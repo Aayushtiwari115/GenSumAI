@@ -1,7 +1,9 @@
+# text_model.py
+
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
-from base_model import BaseNLPModel
-from utils import log_action, measure_time
+from model.base_model import BaseNLPModel
+from Utils.decorators import log_action, measure_time
 
 class TextGenerator(BaseNLPModel):
     """Text generation model (GPT-2)."""

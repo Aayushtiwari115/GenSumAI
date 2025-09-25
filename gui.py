@@ -1,7 +1,9 @@
+# gui.py
+
 import customtkinter as ctk
 from tkinter import messagebox
-from text_model import TextGenerator
-from summary_model import Summarizer
+from model.text_model import TextGenerator
+from model.summary_model import Summarizer
 import os
 
 # Optional image support

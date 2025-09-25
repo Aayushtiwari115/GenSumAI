@@ -1,7 +1,9 @@
+# summary_model.py
+
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
-from base_model import BaseNLPModel
-from utils import log_action, measure_time
+from model.base_model import BaseNLPModel
+from Utils.decorators import log_action, measure_time
 
 class Summarizer(BaseNLPModel):
     """Summarization model (BART)."""
