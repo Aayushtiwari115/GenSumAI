@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
 THEME = {
-    "APP_NAME": "Models",
+    "APP_NAME": "GenSumAI",
     "VERSION": "1.0.0",
     "PRIMARY": "#2B7BE4",
     "ACCENT": "#7AD3FF",
