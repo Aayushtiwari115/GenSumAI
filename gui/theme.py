@@ -1,7 +1,7 @@
 import customtkinter as ctk
 
 THEME = {
-    "APP_NAME": "NeuralFlow Studio",
+    "APP_NAME": "Models",
     "VERSION": "1.0.0",
     "PRIMARY": "#2B7BE4",
     "ACCENT": "#7AD3FF",
