@@ -1,0 +1,23 @@
+# GUI framework
+customtkinter>=5.2.2
+
+# Image handling (for icons and assets)
+Pillow>=10.0.0
+
+# Core NLP (Hugging Face Transformers + dependencies)
+transformers>=4.44.0
+torch>=2.3.0
+sentencepiece>=0.1.99
+sacremoses>=0.1.1
+
+# Tokenizers for Hugging Face models
+tokenizers>=0.19.0
+
+# For Summarizer (Bart-large-cnn requires datasets + regex utils)
+datasets>=2.20.0
+
+# Optional: progress bars for model downloads
+tqdm>=4.66.0
+
+# Ensure compatibility with your Python version (3.13)
+packaging>=23.2
