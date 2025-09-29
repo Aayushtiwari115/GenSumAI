@@ -1,3 +1,5 @@
+# gui/app.py
+
 import os
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
@@ -12,6 +14,7 @@ from .icons import load_icons
 from .theme import THEME, update_colors
 from .layout import setup_layout
 
+
 TEXT_FILE_EXTS = {".py", ".txt", ".md", ".json", ".cfg", ".ini", ".log", ".csv"}
 
 
@@ -19,20 +22,21 @@ class NLPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        # --- Window setup ---
         self.title(f"{THEME['APP_NAME']} v{THEME['VERSION']}")
         self.geometry("1220x780")
         self.minsize(1000, 680)
 
-        # Load assets/icons
+        # --- Load assets/icons ---
         assets_folder = os.path.join(os.path.dirname(__file__), "assets")
         self.icons = load_icons(assets_folder)
 
-        # Initialize models
+        # --- Initialize models ---
         try:
             self.models = {
                 "Text Generation": TextGenerator("openai-community/gpt2"),
                 "Summarization": Summarizer("facebook/bart-large-cnn"),
-                "Translation": TranslationModelAdapter("French"),
+                "Translation": TranslationModelAdapter("French"),  # default
                 "Image Classification": ImageClassificationModelAdapter(),
             }
         except Exception as e:
@@ -40,7 +44,7 @@ class NLPApp(ctk.CTk):
             self.destroy()
             return
 
-        # Build mapping: model_name -> task(s)
+        # --- Map model_name → task(s) ---
         self.model_name_to_task = {}
         for task, model in self.models.items():
             try:
@@ -56,14 +60,14 @@ class NLPApp(ctk.CTk):
         self.supported_languages = list(TranslationModelAdapter.SUPPORTED_MODELS.keys())
         self.lang_dropdown = None
 
-        # Executor for background tasks
+        # Executor for background jobs
         self.executor = ThreadPoolExecutor(max_workers=1)
 
-        # Setup GUI layout
+        # --- Setup GUI layout ---
         setup_layout(self)
         self.select_task("Text Generation")
 
-    # ------------------ task selection sync ------------------
+    # ------------------ Task selection ------------------
     def on_model_selected(self, selected_model_name):
         if not selected_model_name:
             return
@@ -88,6 +92,7 @@ class NLPApp(ctk.CTk):
             task = task[0] if task else "Text Generation"
         if not isinstance(task, str):
             task = str(task)
+
         self.task_var.set(task)
 
         # Sync segmented control
@@ -125,9 +130,8 @@ class NLPApp(ctk.CTk):
             if self.lang_dropdown:
                 self.lang_dropdown.pack_forget()
 
-    # ------------------ dark/light mode ------------------
+    # ------------------ Dark/Light mode ------------------
     def toggle_mode(self):
-        """Toggle between light and dark mode."""
         mode = "dark" if self.dark_mode_var.get() else "light"
         ctk.set_appearance_mode(mode)
         update_colors(self)
@@ -136,7 +140,7 @@ class NLPApp(ctk.CTk):
         except Exception:
             pass
 
-    # ------------------ model run ------------------
+    # ------------------ Model execution ------------------
     def _run_model_background(self, task, text):
         """Runs inside a worker thread. Return (success, result)."""
         try:
@@ -173,7 +177,7 @@ class NLPApp(ctk.CTk):
         task = self.task_var.get()
         text = self.input_box.get("1.0", "end").strip()
 
-        # Image Classification doesn’t need text input
+        # Image Classification doesn’t need text
         if task != "Image Classification" and not text:
             messagebox.showwarning("Warning", "Please enter some text first.")
             return
@@ -218,12 +222,25 @@ class NLPApp(ctk.CTk):
                 pass
             self.after(600, lambda: self.progress.set(0.0))
 
+    # ------------------ Image file browsing ------------------
+    def browse_image(self):
+        """Open file dialog and store chosen image path."""
+        img_path = filedialog.askopenfilename(
+            title="Select an image",
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")],
+        )
+        if img_path:
+            self._last_image_path = img_path
+            self.status_left.configure(text=f"Selected image: {os.path.basename(img_path)}")
+            self.add_activity(f"Image selected: {img_path}")
+        else:
+            self._last_image_path = None
+
     # ------------------ Menu & File viewer ------------------
     def open_menu_window(self):
         win = ctk.CTkToplevel(self)
         win.title("Menu & Files")
         win.geometry("500x400")
-        ctk.CTkLabel(win, text="Menu window (coming soon)...", font=THEME["FONT_MD"]).pack(padx=20, pady=20)
 
         from customtkinter import CTkTabview
         tabs = CTkTabview(win, width=740, height=480)
@@ -272,23 +289,9 @@ class NLPApp(ctk.CTk):
         ctk.CTkButton(menu_frame, text="About", command=self.show_about).pack(pady=8, anchor="w")
         ctk.CTkButton(menu_frame, text="Quit", command=self.quit).pack(pady=8, anchor="w")
 
-    def browse_image(self):
-        """Open file dialog and store chosen image path."""
-        img_path = filedialog.askopenfilename(
-            title="Select an image",
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")],
-        )
-        if img_path:
-            self._last_image_path = img_path
-            self.status_left.configure(text=f"Selected image: {os.path.basename(img_path)}")
-            self.add_activity(f"Image selected: {img_path}")
-        else:
-            self._last_image_path = None
-
     def open_file_viewer(self, filepath):
         """Simple text file viewer window."""
         try:
-            ext = os.path.splitext(filepath)[1].lower()
             with open(filepath, "r", encoding="utf-8") as f:
                 content = f.read()
         except Exception as e:
@@ -304,6 +307,7 @@ class NLPApp(ctk.CTk):
         text.configure(state="disabled")
         ctk.CTkButton(win, text="Close", command=win.destroy).pack(pady=8)
 
+    # ------------------ Settings & About ------------------
     def open_settings(self):
         dlg = ctk.CTkToplevel(self)
         dlg.title("Settings")
@@ -311,8 +315,7 @@ class NLPApp(ctk.CTk):
         ctk.CTkLabel(dlg, text="Application Settings", font=THEME["FONT_LG"]).pack(padx=20, pady=16)
         ctk.CTkLabel(dlg, text="Configure model/autosave/logging here.", font=THEME["FONT_MD"]).pack(padx=20, pady=6)
         save_var = ctk.BooleanVar(value=False)
-        autosave = ctk.CTkCheckBox(dlg, text="Autosave history", variable=save_var)
-        autosave.pack(pady=6, padx=20, anchor="w")
+        ctk.CTkCheckBox(dlg, text="Autosave history", variable=save_var).pack(pady=6, padx=20, anchor="w")
         ctk.CTkButton(dlg, text="Close", command=dlg.destroy).pack(side="bottom", pady=16)
 
     def show_about(self):
@@ -321,7 +324,7 @@ class NLPApp(ctk.CTk):
             f"{THEME['APP_NAME']} v{THEME['VERSION']}\nDesigned for professional NLP & Vision workflows.",
         )
 
-    # ------------------ utilities ------------------
+    # ------------------ Utilities ------------------
     def clear_all(self):
         try:
             self.input_box.delete("1.0", "end")
