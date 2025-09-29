@@ -280,20 +280,19 @@ def setup_layout(app):
         side="left", padx=(0, 12)
     )
 
-    # Translation dropdown (hidden initially)
+    # Translation dropdown (hidden initially, styled brighter)
     app.lang_dropdown = ctk.CTkOptionMenu(
         toolbar,
         variable=app.lang_var,
         values=app.supported_languages,
         width=200,
-        fg_color=THEME["PRIMARY"],          # background color (make it bright)
-        button_color=THEME["PRIMARY"],      # dropdown button color
-        button_hover_color="#1f6aa5",       # hover effect (brighter blue)
-        text_color="white",                 # text color
-        dropdown_fg_color="#f5f5f5",        # dropdown menu background
-        ropdown_text_color="black",        # dropdown menu text
-        dropdown_hover_color="#d1d1d1",     # dropdown hover
-
+        fg_color=THEME["PRIMARY"],        # bright background
+        button_color=THEME["PRIMARY"],    # button same bright
+        button_hover_color="#1f6aa5",     # hover color
+        text_color="white",               # white text
+        dropdown_fg_color="#f5f5f5",      # dropdown menu bg
+        dropdown_text_color="black",      # dropdown text
+        dropdown_hover_color="#d1d1d1"    # dropdown hover
     )
     app.lang_dropdown.pack(side="left", padx=(12, 0))
     app.lang_dropdown.pack_forget()
@@ -303,7 +302,9 @@ def setup_layout(app):
         toolbar,
         text="Browse Image",
         command=lambda: app.browse_image(),
-        width=120
+        width=140,
+        fg_color=THEME["PRIMARY"],
+        text_color="white"
     )
     app.image_browse_btn.pack(side="left", padx=(12, 0))
     app.image_browse_btn.pack_forget()
