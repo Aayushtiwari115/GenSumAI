@@ -228,7 +228,6 @@ class NLPApp(ctk.CTk):
         win.geometry("500x400")
         ctk.CTkLabel(win, text="Menu window (coming soon)...", font=THEME["FONT_MD"]).pack(padx=20, pady=20)
 
-
         from customtkinter import CTkTabview
         tabs = CTkTabview(win, width=740, height=480)
         tabs.pack(padx=10, pady=10, fill="both", expand=True)
@@ -275,6 +274,19 @@ class NLPApp(ctk.CTk):
         ctk.CTkButton(menu_frame, text="Open Settings", command=self.open_settings).pack(pady=8, anchor="w")
         ctk.CTkButton(menu_frame, text="About", command=self.show_about).pack(pady=8, anchor="w")
         ctk.CTkButton(menu_frame, text="Quit", command=self.quit).pack(pady=8, anchor="w")
+
+    def browse_image(self):
+        """Open file dialog and store chosen image path."""
+        img_path = filedialog.askopenfilename(
+            title="Select an image",
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")],
+        )
+        if img_path:
+            self._last_image_path = img_path
+            self.status_left.configure(text=f"Selected image: {os.path.basename(img_path)}")
+            self.add_activity(f"Image selected: {img_path}")
+        else:
+            self._last_image_path = None
 
     def open_file_viewer(self, filepath):
         """Simple text file viewer window."""
