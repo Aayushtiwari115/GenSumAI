@@ -154,10 +154,7 @@ class NLPApp(ctk.CTk):
                 result = self.models["Translation"].run(text)
 
             elif task == "Image Classification":
-                img_path = filedialog.askopenfilename(
-                    title="Select an image",
-                    filetypes=[("Image files", "*.jpg *.png *.jpeg *.bmp")],
-                )
+                img_path = getattr(self, "_last_image_path", None)
                 if not img_path:
                     return False, "No image selected"
                 pipeline = self.models[task]._build_pipeline()
