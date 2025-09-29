@@ -9,18 +9,19 @@ class TranslationModelAdapter:
     """
 
     SUPPORTED_MODELS = {
-        "French":  "Helsinki-NLP/opus-mt-en-fr",
-        "German":  "Helsinki-NLP/opus-mt-en-de",
+       
+        "French": "Helsinki-NLP/opus-mt-en-fr",
+        "German": "Helsinki-NLP/opus-mt-en-de",
         "Spanish": "Helsinki-NLP/opus-mt-en-es",
         "Italian": "Helsinki-NLP/opus-mt-en-it",
         "Russian": "Helsinki-NLP/opus-mt-en-ru",
-        "Chinese": "Helsinki-NLP/opus-mt-en-zh",
-        # NOTE: OPUS MT uses 'ja' for Japanese
-        "Japanese": "Helsinki-NLP/opus-mt-en-ja",
-        "Arabic":  "Helsinki-NLP/opus-mt-en-ar",
-        "Nepali":  "Helsinki-NLP/opus-mt-en-ne",
-        "Hindi":   "Helsinki-NLP/opus-mt-en-hi",
-    }
+        "Chinese": "Helsinki-NLP/opus-mt-en-zh",   # fallback: zh_cn
+        "Japanese": "Helsinki-NLP/opus-mt-en-ja",  # safer than jap
+        "Arabic": "Helsinki-NLP/opus-mt-en-ar",
+        "Nepali": "Helsinki-NLP/opus-mt-en-ne",    # may fail
+        "Hindi": "Helsinki-NLP/opus-mt-en-hi",     # sometimes unstable
+}
+
 
     def __init__(self, target_lang: str = "French"):
         """
