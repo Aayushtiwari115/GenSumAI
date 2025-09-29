@@ -161,10 +161,18 @@ def setup_layout(app):
 
     center_nav = ctk.CTkFrame(nav, fg_color="transparent")
     center_nav.pack(side="left", expand=True)
-    model_names = [
-        m.get_model_name() if hasattr(m, "get_model_name") else str(m)
-        for m in app.models.values()
-    ]
+
+    # Friendly model names
+    model_names = []
+    for m in app.models.values():
+        if hasattr(m, "get_model_name"):
+            try:
+                model_names.append(m.get_model_name())
+            except Exception:
+                model_names.append(str(m))
+        else:
+            model_names.append(str(m))
+
     app.model_selector = ctk.CTkOptionMenu(
         center_nav, values=model_names, width=260, command=app.on_model_selected
     )
@@ -177,6 +185,7 @@ def setup_layout(app):
     app.model_selector.pack(side="left", padx=(6, 12))
     ToolTip(app.model_selector, "Select the underlying model")
 
+    # Segmented task control
     app.task_segment = ctk.CTkSegmentedButton(
         center_nav, values=list(app.models.keys()), command=app.select_task
     )
@@ -217,7 +226,7 @@ def setup_layout(app):
     left_col = ctk.CTkFrame(content, fg_color="transparent")
     left_col.pack(side="left", fill="both", expand=True, padx=(0, 12))
 
-    # Input card with toggle
+    # Input card
     app.input_frame = ctk.CTkFrame(
         left_col, fg_color=("gray95", THEME["CARD_DARK"]), corner_radius=8
     )
@@ -232,8 +241,8 @@ def setup_layout(app):
     )
     app.input_label.pack(side="left")
 
+    # Collapse/expand input
     app._input_collapsed = False
-
     def _toggle_input():
         if app._input_collapsed:
             app.input_box.pack(fill="both", padx=P, pady=(0, P))
@@ -392,5 +401,4 @@ def setup_layout(app):
     app.add_activity = add_activity
 
     from .theme import update_colors
-
     update_colors(app)
