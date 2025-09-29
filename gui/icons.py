@@ -7,11 +7,14 @@ try:
 except Exception:
     PIL_AVAILABLE = False
 
+
 def load_icons(assets_folder: str):
     icon_configs = {
         "logo": ("logo.png", (36, 36)),
-        "gen": ("gen_icon.png", (20, 20)),
-        "sum": ("sum_icon.png", (20, 20)),
+        "gen": ("gen_icon.png", (20, 20)),        # Text Generation
+        "sum": ("sum_icon.png", (20, 20)),        # Summarization
+        "translate": ("translate.png", (20, 20)), # Translation
+        "image": ("image_icon.png", (20, 20)),    # Image Classification
         "settings": ("settings.png", (18, 18)),
         "info": ("info.png", (18, 18)),
         "copy": ("copy.png", (16, 16)),
