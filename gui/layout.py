@@ -142,17 +142,6 @@ def setup_layout(app):
         btn.pack(side="right", padx=6)
         ToolTip(btn, "Settings")
 
-    # Extra image browse button (hidden unless Image Classification is selected)
-    app.image_browse_btn = ctk.CTkButton(
-    toolbar,
-    text="Browse Image",
-    command=lambda: app.browse_image(),
-    width=120
-)
-    app.image_browse_btn.pack(side="left", padx=(12, 0))
-    app.image_browse_btn.pack_forget()  # hidden initially
-
-
     # Main content
     main = ctk.CTkFrame(app, fg_color="transparent")
     main.pack(side="left", fill="both", expand=True, padx=(P, P // 2), pady=P)
@@ -297,6 +286,16 @@ def setup_layout(app):
     )
     app.lang_dropdown.pack(side="left", padx=(12, 0))
     app.lang_dropdown.pack_forget()
+
+    # Image browse button (hidden initially)
+    app.image_browse_btn = ctk.CTkButton(
+        toolbar,
+        text="Browse Image",
+        command=lambda: app.browse_image(),
+        width=120
+    )
+    app.image_browse_btn.pack(side="left", padx=(12, 0))
+    app.image_browse_btn.pack_forget()
 
     # Status / progress
     status_frame = ctk.CTkFrame(left_col, fg_color="transparent")
