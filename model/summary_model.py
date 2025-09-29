@@ -5,19 +5,23 @@ import torch
 from model.base_model import BaseNLPModel
 from Utils.decorators import log_action, measure_time
 
+
 class Summarizer(BaseNLPModel):
     """Summarization model (BART)."""
 
     def __init__(self, model_name: str = "facebook/bart-large-cnn"):
-        super().__init__(model_name)   # inheritance
+        super().__init__(model_name)   # inheritance stores self.model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        self.model.eval()
 
     @log_action
     @measure_time
     def run(self, text: str, max_length: int = 150, min_length: int = 40) -> str:
         """Override base method: run() → summarization."""
-        inputs = self.tokenizer([text], return_tensors="pt", max_length=1024, truncation=True)
+        inputs = self.tokenizer(
+            [text], return_tensors="pt", max_length=1024, truncation=True
+        )
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
@@ -25,6 +29,13 @@ class Summarizer(BaseNLPModel):
                 min_length=min_length,
                 length_penalty=2.0,
                 num_beams=4,
-                early_stopping=True
+                early_stopping=True,
             )
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    # Friendly name for UI
+    def get_model_name(self) -> str:
+        return "BART Summarizer"
+
+    def __str__(self) -> str:
+        return self.get_model_name()
