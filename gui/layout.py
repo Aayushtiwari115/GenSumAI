@@ -282,7 +282,18 @@ def setup_layout(app):
 
     # Translation dropdown (hidden initially)
     app.lang_dropdown = ctk.CTkOptionMenu(
-        toolbar, variable=app.lang_var, values=app.supported_languages, width=180
+        toolbar,
+        variable=app.lang_var,
+        values=app.supported_languages,
+        width=200,
+        fg_color=THEME["PRIMARY"],          # background color (make it bright)
+        button_color=THEME["PRIMARY"],      # dropdown button color
+        button_hover_color="#1f6aa5",       # hover effect (brighter blue)
+        text_color="white",                 # text color
+        dropdown_fg_color="#f5f5f5",        # dropdown menu background
+        ropdown_text_color="black",        # dropdown menu text
+        dropdown_hover_color="#d1d1d1",     # dropdown hover
+
     )
     app.lang_dropdown.pack(side="left", padx=(12, 0))
     app.lang_dropdown.pack_forget()

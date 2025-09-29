@@ -43,6 +43,22 @@ class NLPApp(ctk.CTk):
             messagebox.showerror("Error", f"Model initialization failed: {e}")
             self.destroy()
             return
+        # Show/hide translation language dropdown
+        if task == "Translation":
+            if self.lang_dropdown:
+                self.lang_dropdown.pack(side="left", padx=6)
+        else:
+            if self.lang_dropdown:
+                self.lang_dropdown.pack_forget()
+
+# Show/hide browse button for Image Classification
+        if task == "Image Classification":
+            if self.image_browse_btn:
+                self.image_browse_btn.pack(side="left", padx=6)
+        else:
+            if self.image_browse_btn:
+                self.image_browse_btn.pack_forget()
+
 
         # --- Map model_name → task(s) ---
         self.model_name_to_task = {}
