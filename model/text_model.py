@@ -27,8 +27,6 @@ class TextGenerator(BaseNLPModel):
                 do_sample=True
             )
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-class TextGenerator(BaseNLPModel):
     ...
     def get_model_name(self):
         return "GPT-2 Text Generator"

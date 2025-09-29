@@ -223,10 +223,11 @@ class NLPApp(ctk.CTk):
 
     # ------------------ Menu & File viewer ------------------
     def open_menu_window(self):
-        """Open separate window with Files and Menu tabs."""
         win = ctk.CTkToplevel(self)
         win.title("Menu & Files")
-        win.geometry("760x520")
+        win.geometry("500x400")
+        ctk.CTkLabel(win, text="Menu window (coming soon)...", font=THEME["FONT_MD"]).pack(padx=20, pady=20)
+
 
         from customtkinter import CTkTabview
         tabs = CTkTabview(win, width=740, height=480)
