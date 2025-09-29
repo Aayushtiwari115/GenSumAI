@@ -2,7 +2,6 @@ import os
 import customtkinter as ctk
 from tkinter import messagebox, filedialog
 from concurrent.futures import ThreadPoolExecutor
-from functools import partial
 
 from model.text_model import TextGenerator
 from model.summary_model import Summarizer
@@ -33,7 +32,7 @@ class NLPApp(ctk.CTk):
             self.models = {
                 "Text Generation": TextGenerator("openai-community/gpt2"),
                 "Summarization": Summarizer("facebook/bart-large-cnn"),
-                "Translation": TranslationModelAdapter("French"),  # default
+                "Translation": TranslationModelAdapter("French"),
                 "Image Classification": ImageClassificationModelAdapter(),
             }
         except Exception as e:
@@ -118,7 +117,7 @@ class NLPApp(ctk.CTk):
         except Exception:
             pass
 
-        # --- Show/hide translation language dropdown ---
+        # Show/hide translation language dropdown
         if task == "Translation":
             if self.lang_dropdown:
                 self.lang_dropdown.pack(side="left", padx=6)
@@ -126,11 +125,20 @@ class NLPApp(ctk.CTk):
             if self.lang_dropdown:
                 self.lang_dropdown.pack_forget()
 
+    # ------------------ dark/light mode ------------------
+    def toggle_mode(self):
+        """Toggle between light and dark mode."""
+        mode = "dark" if self.dark_mode_var.get() else "light"
+        ctk.set_appearance_mode(mode)
+        update_colors(self)
+        try:
+            self.status_right.configure(text=f"{mode.title()} mode")
+        except Exception:
+            pass
+
     # ------------------ model run ------------------
     def _run_model_background(self, task, text):
-        """
-        This runs inside a worker thread. Return (success, result).
-        """
+        """Runs inside a worker thread. Return (success, result)."""
         try:
             if task == "Text Generation":
                 result = self.models[task].run(text, max_length=self.max_len.get())
@@ -212,6 +220,96 @@ class NLPApp(ctk.CTk):
             except Exception:
                 pass
             self.after(600, lambda: self.progress.set(0.0))
+
+    # ------------------ Menu & File viewer ------------------
+    def open_menu_window(self):
+        """Open separate window with Files and Menu tabs."""
+        win = ctk.CTkToplevel(self)
+        win.title("Menu & Files")
+        win.geometry("760x520")
+
+        from customtkinter import CTkTabview
+        tabs = CTkTabview(win, width=740, height=480)
+        tabs.pack(padx=10, pady=10, fill="both", expand=True)
+        tabs.add("Files")
+        tabs.add("Menu")
+
+        # Files tab
+        files_frame = ctk.CTkFrame(tabs.tab("Files"))
+        files_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+        items = []
+        if os.path.isdir(assets_dir):
+            assets = sorted(os.listdir(assets_dir))
+            if assets:
+                items.append(("Assets", assets_dir, assets))
+
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        project_files = []
+        for fn in sorted(os.listdir(project_root)):
+            fp = os.path.join(project_root, fn)
+            if os.path.isfile(fp):
+                project_files.append(fn)
+        if project_files:
+            items.append(("Project", project_root, project_files))
+
+        list_container = ctk.CTkScrollableFrame(files_frame, width=700, height=420)
+        list_container.pack(fill="both", expand=True)
+        for title, folder, files in items:
+            hdr = ctk.CTkLabel(list_container, text=title, font=THEME["FONT_MD"], anchor="w")
+            hdr.pack(fill="x", pady=(6, 0), padx=6)
+            for fn in files:
+                fp = os.path.join(folder, fn)
+                btn = ctk.CTkButton(
+                    list_container, text=f" {fn}", anchor="w", fg_color="transparent",
+                    hover_color=("gray85", "gray25"),
+                    command=lambda f=fp: self.open_file_viewer(f)
+                )
+                btn.pack(fill="x", padx=8, pady=2)
+
+        # Menu tab
+        menu_frame = ctk.CTkFrame(tabs.tab("Menu"))
+        menu_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        ctk.CTkButton(menu_frame, text="Open Settings", command=self.open_settings).pack(pady=8, anchor="w")
+        ctk.CTkButton(menu_frame, text="About", command=self.show_about).pack(pady=8, anchor="w")
+        ctk.CTkButton(menu_frame, text="Quit", command=self.quit).pack(pady=8, anchor="w")
+
+    def open_file_viewer(self, filepath):
+        """Simple text file viewer window."""
+        try:
+            ext = os.path.splitext(filepath)[1].lower()
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+        except Exception as e:
+            messagebox.showinfo("Error", f"Failed to open file: {e}")
+            return
+
+        win = ctk.CTkToplevel(self)
+        win.title(os.path.basename(filepath))
+        win.geometry("760x520")
+        text = ctk.CTkTextbox(win, font=THEME["FONT_MD"])
+        text.pack(fill="both", expand=True, padx=10, pady=10)
+        text.insert("1.0", content)
+        text.configure(state="disabled")
+        ctk.CTkButton(win, text="Close", command=win.destroy).pack(pady=8)
+
+    def open_settings(self):
+        dlg = ctk.CTkToplevel(self)
+        dlg.title("Settings")
+        dlg.geometry("520x360")
+        ctk.CTkLabel(dlg, text="Application Settings", font=THEME["FONT_LG"]).pack(padx=20, pady=16)
+        ctk.CTkLabel(dlg, text="Configure model/autosave/logging here.", font=THEME["FONT_MD"]).pack(padx=20, pady=6)
+        save_var = ctk.BooleanVar(value=False)
+        autosave = ctk.CTkCheckBox(dlg, text="Autosave history", variable=save_var)
+        autosave.pack(pady=6, padx=20, anchor="w")
+        ctk.CTkButton(dlg, text="Close", command=dlg.destroy).pack(side="bottom", pady=16)
+
+    def show_about(self):
+        messagebox.showinfo(
+            "About",
+            f"{THEME['APP_NAME']} v{THEME['VERSION']}\nDesigned for professional NLP & Vision workflows.",
+        )
 
     # ------------------ utilities ------------------
     def clear_all(self):
