@@ -24,6 +24,7 @@ class NLPApp(ctk.CTk):
         self.geometry("1220x780")
         self.minsize(1000, 680)
 
+        # Load assets/icons
         assets_folder = os.path.join(os.path.dirname(__file__), "assets")
         self.icons = load_icons(assets_folder)
 
@@ -40,7 +41,7 @@ class NLPApp(ctk.CTk):
             self.destroy()
             return
 
-        # Mapping: model_name -> task(s)
+        # Build mapping: model_name -> task(s)
         self.model_name_to_task = {}
         for task, model in self.models.items():
             try:
@@ -59,6 +60,7 @@ class NLPApp(ctk.CTk):
         # Executor for background tasks
         self.executor = ThreadPoolExecutor(max_workers=1)
 
+        # Setup GUI layout
         setup_layout(self)
         self.select_task("Text Generation")
 
@@ -89,11 +91,13 @@ class NLPApp(ctk.CTk):
             task = str(task)
         self.task_var.set(task)
 
+        # Sync segmented control
         try:
             self.task_segment.set(task)
         except Exception:
             pass
 
+        # Sync model selector
         try:
             model_name = self.models.get(task).get_model_name()
             if self.model_selector.get() != model_name:
@@ -101,6 +105,7 @@ class NLPApp(ctk.CTk):
         except Exception:
             pass
 
+        # Highlight sidebar button
         for t, btn in getattr(self, "task_buttons", {}).items():
             try:
                 btn.configure(fg_color=THEME["PRIMARY"] if t == task else "transparent")
@@ -113,7 +118,7 @@ class NLPApp(ctk.CTk):
         except Exception:
             pass
 
-        # --- Show dropdown only for Translation ---
+        # --- Show/hide translation language dropdown ---
         if task == "Translation":
             if self.lang_dropdown:
                 self.lang_dropdown.pack(side="left", padx=6)
@@ -123,6 +128,9 @@ class NLPApp(ctk.CTk):
 
     # ------------------ model run ------------------
     def _run_model_background(self, task, text):
+        """
+        This runs inside a worker thread. Return (success, result).
+        """
         try:
             if task == "Text Generation":
                 result = self.models[task].run(text, max_length=self.max_len.get())
@@ -160,6 +168,7 @@ class NLPApp(ctk.CTk):
         task = self.task_var.get()
         text = self.input_box.get("1.0", "end").strip()
 
+        # Image Classification doesn’t need text input
         if task != "Image Classification" and not text:
             messagebox.showwarning("Warning", "Please enter some text first.")
             return
