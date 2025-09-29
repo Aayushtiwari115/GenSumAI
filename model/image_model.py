@@ -1,5 +1,5 @@
 import os
-from .base import BaseModelAdapter
+from .base_model import BaseModelAdapter
 from transformers import pipeline
 
 class ImageClassificationModelAdapter(BaseModelAdapter):
