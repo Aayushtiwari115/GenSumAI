@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from .theme import THEME
 
 
@@ -53,7 +53,7 @@ def setup_layout(app):
     GAP = THEME["GAP"]
     P = THEME["PADDING"]
 
-    # Sidebar
+    # ---------------- Sidebar ----------------
     app.sidebar = ctk.CTkFrame(
         app,
         width=THEME["SIDEBAR_WIDTH"],
@@ -63,6 +63,7 @@ def setup_layout(app):
     app.sidebar.pack(side="left", fill="y", padx=(P, 0), pady=P)
     app.sidebar.pack_propagate(False)
 
+    # Logo + Title
     top_logo = ctk.CTkFrame(app.sidebar, fg_color="transparent")
     top_logo.pack(fill="x", pady=(P // 2, P))
     if app.icons.get("logo"):
@@ -77,6 +78,7 @@ def setup_layout(app):
     )
     app.title_label.pack(side="left", anchor="w")
 
+    # Tasks list
     task_container = ctk.CTkFrame(app.sidebar, fg_color="transparent")
     task_container.pack(fill="x", pady=(8, 12), padx=6)
 
@@ -86,6 +88,7 @@ def setup_layout(app):
         font=THEME["FONT_SM"],
         text_color=("gray60", "gray70"),
     ).pack(anchor="w", pady=(0, 8))
+
     app.task_buttons = {}
     for task in app.models.keys():
         if "Text" in task:
@@ -117,6 +120,7 @@ def setup_layout(app):
         btn.bind("<Return>", lambda e, t=task: app.select_task(t))
         app.task_buttons[task] = btn
 
+    # Sidebar bottom
     sidebar_bottom = ctk.CTkFrame(app.sidebar, fg_color="transparent")
     sidebar_bottom.pack(side="bottom", fill="x", pady=P, padx=6)
     app.dark_mode_var = ctk.BooleanVar(
@@ -129,6 +133,7 @@ def setup_layout(app):
         command=app.toggle_mode,
     )
     switch.pack(side="left")
+
     if app.icons.get("settings"):
         btn = ctk.CTkButton(
             sidebar_bottom,
@@ -142,10 +147,11 @@ def setup_layout(app):
         btn.pack(side="right", padx=6)
         ToolTip(btn, "Settings")
 
-    # Main content
+    # ---------------- Main Content ----------------
     main = ctk.CTkFrame(app, fg_color="transparent")
     main.pack(side="left", fill="both", expand=True, padx=(P, P // 2), pady=P)
 
+    # Top nav
     nav = ctk.CTkFrame(main, height=64, fg_color=("gray95", THEME["CARD_DARK"]))
     nav.pack(fill="x", pady=(0, 12))
     nav.pack_propagate(False)
@@ -159,10 +165,11 @@ def setup_layout(app):
         text_color=(THEME["TEXT_LIGHT"], THEME["TEXT_DARK"]),
     ).pack(anchor="w")
 
+    # Center nav
     center_nav = ctk.CTkFrame(nav, fg_color="transparent")
     center_nav.pack(side="left", expand=True)
 
-    # Friendly model names
+    # Model selector
     model_names = []
     for m in app.models.values():
         if hasattr(m, "get_model_name"):
@@ -185,13 +192,14 @@ def setup_layout(app):
     app.model_selector.pack(side="left", padx=(6, 12))
     ToolTip(app.model_selector, "Select the underlying model")
 
-    # Segmented task control
+    # Segmented task switcher
     app.task_segment = ctk.CTkSegmentedButton(
         center_nav, values=list(app.models.keys()), command=app.select_task
     )
     app.task_segment.set("Text Generation")
     app.task_segment.pack(side="left", padx=6)
 
+    # Right nav
     right_nav = ctk.CTkFrame(nav, fg_color="transparent")
     right_nav.pack(side="right", padx=6)
     app.run_button = ctk.CTkButton(
@@ -203,6 +211,19 @@ def setup_layout(app):
     )
     app.run_button.pack(side="left", padx=(6, 12))
     ToolTip(app.run_button, "Run the selected task (Ctrl+R)")
+
+    app.batch_button = ctk.CTkButton(
+        right_nav,
+        text="Batch Run",
+        width=100,
+        command=lambda: app.run_batch_file(app.task_var.get(), 
+                                           filedialog.askopenfilename()),
+        image=app.icons.get("run"),
+        fg_color=THEME["PRIMARY"]
+    )
+    app.batch_button.pack(side="left", padx=(6, 12))
+    ToolTip(app.batch_button, "Run batch file for Summarization/Translation")
+
     clear_btn = ctk.CTkButton(
         right_nav,
         text="Clear",
@@ -217,9 +238,9 @@ def setup_layout(app):
         right_nav, text="Menu", width=80, command=app.open_menu_window
     )
     menu_btn.pack(side="left", padx=6)
-    ToolTip(menu_btn, "Open Files & Menu (separate window)")
+    ToolTip(menu_btn, "Open Files & Menu")
 
-    # Content area
+    # ---------------- Content Area ----------------
     content = ctk.CTkFrame(main, fg_color="transparent")
     content.pack(fill="both", expand=True)
 
@@ -243,6 +264,7 @@ def setup_layout(app):
 
     # Collapse/expand input
     app._input_collapsed = False
+
     def _toggle_input():
         if app._input_collapsed:
             app.input_box.pack(fill="both", padx=P, pady=(0, P))
@@ -262,7 +284,7 @@ def setup_layout(app):
     app.input_box = ctk.CTkTextbox(app.input_frame, height=200, font=THEME["FONT_MD"])
     app.input_box.pack(fill="both", padx=P, pady=(0, P))
 
-    # Parameter toolbar
+    # Toolbar
     toolbar = ctk.CTkFrame(left_col, fg_color="transparent")
     toolbar.pack(fill="x", pady=(0, 12))
     app.max_len = ctk.IntVar(value=150)
@@ -280,24 +302,24 @@ def setup_layout(app):
         side="left", padx=(0, 12)
     )
 
-    # Translation dropdown (hidden initially, styled brighter)
+    # Translation dropdown
     app.lang_dropdown = ctk.CTkOptionMenu(
         toolbar,
         variable=app.lang_var,
         values=app.supported_languages,
         width=200,
-        fg_color=THEME["PRIMARY"],        # bright background
-        button_color=THEME["PRIMARY"],    # button same bright
-        button_hover_color="#1f6aa5",     # hover color
-        text_color="black",               # black text
-        dropdown_fg_color="#f5f5f5",      # dropdown menu bg
-        dropdown_text_color="black",      # dropdown text
-        dropdown_hover_color="#d1d1d1"    # dropdown hover
+        fg_color=THEME["PRIMARY"],
+        button_color=THEME["PRIMARY"],
+        button_hover_color="#1f6aa5",
+        text_color="black",
+        dropdown_fg_color="#f5f5f5",
+        dropdown_text_color="black",
+        dropdown_hover_color="#d1d1d1"
     )
     app.lang_dropdown.pack(side="left", padx=(12, 0))
     app.lang_dropdown.pack_forget()
 
-    # Image browse button (hidden initially)
+    # Image browse button
     app.image_browse_btn = ctk.CTkButton(
         toolbar,
         text="Browse Image",
@@ -315,13 +337,13 @@ def setup_layout(app):
     app.progress = ctk.CTkProgressBar(status_frame, orientation="horizontal", width=300)
     app.progress.set(0.0)
     app.progress.pack(side="left", padx=(0, 12))
-    app.status_left = ctk.CTkLabel(
+    app.status_label = ctk.CTkLabel(
         status_frame,
         text="Ready",
         font=THEME["FONT_SM"],
         text_color=("gray60", "gray70"),
     )
-    app.status_left.pack(side="left")
+    app.status_label.pack(side="left")
 
     # Output card
     app.output_frame = ctk.CTkFrame(
@@ -339,7 +361,8 @@ def setup_layout(app):
     app.output_label.pack(side="left")
     actions = ctk.CTkFrame(output_header, fg_color="transparent")
     actions.pack(side="right")
-    ctk.CTkButton(
+
+    copy_btn = ctk.CTkButton(
         actions,
         text="",
         width=36,
@@ -347,8 +370,11 @@ def setup_layout(app):
         image=app.icons.get("copy"),
         fg_color="transparent",
         command=app.copy_output,
-    ).pack(side="left", padx=6)
-    ctk.CTkButton(
+    )
+    copy_btn.pack(side="left", padx=6)
+    ToolTip(copy_btn, "Copy output")
+
+    clear_output_btn = ctk.CTkButton(
         actions,
         text="",
         width=36,
@@ -356,13 +382,14 @@ def setup_layout(app):
         image=app.icons.get("close"),
         fg_color="transparent",
         command=lambda: app.output_box.delete("1.0", "end"),
-    ).pack(side="left")
-    ToolTip(actions, "Copy / Clear output")
+    )
+    clear_output_btn.pack(side="left")
+    ToolTip(clear_output_btn, "Clear output")
 
     app.output_box = ctk.CTkTextbox(app.output_frame, font=THEME["FONT_MD"])
     app.output_box.pack(fill="both", expand=True, padx=P, pady=(0, P))
 
-    # Right panel: Activity & History
+    # Right panel: Activity
     app.right_panel = ctk.CTkFrame(
         content, width=320, fg_color=("gray95", THEME["CARD_DARK"]), corner_radius=8
     )
@@ -417,10 +444,4 @@ def setup_layout(app):
     app.bind_all("<Control-C>", lambda e: app.copy_output())
     app.bind_all("<Control-q>", lambda e: app.quit())
     app.bind_all("<Control-Q>", lambda e: app.quit())
-    app.bind_all("<Control-t>", lambda e: _toggle_input())
-    app.bind_all("<Control-T>", lambda e: _toggle_input())
 
-    app.add_activity = add_activity
-
-    from .theme import update_colors
-    update_colors(app)
