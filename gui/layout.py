@@ -289,7 +289,7 @@ def setup_layout(app):
         fg_color=THEME["PRIMARY"],        # bright background
         button_color=THEME["PRIMARY"],    # button same bright
         button_hover_color="#1f6aa5",     # hover color
-        text_color="white",               # white text
+        text_color="black",               # black text
         dropdown_fg_color="#f5f5f5",      # dropdown menu bg
         dropdown_text_color="black",      # dropdown text
         dropdown_hover_color="#d1d1d1"    # dropdown hover
