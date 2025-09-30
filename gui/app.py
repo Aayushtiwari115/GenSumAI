@@ -315,6 +315,39 @@ class NLPApp(ctk.CTk):
         text.configure(state="disabled")
         ctk.CTkButton(win, text="Close", command=win.destroy).pack(pady=8)
 
+    def run_batch_file(self, task, filepath):
+        try:
+            results = []
+            with open(filepath, "r", encoding="utf-8") as f:
+                lines = [line.strip() for line in f if line.strip()]
+
+            for line in lines:
+                if task == "Summarization":
+                    res = self.models["Summarization"].run(
+                        line, 
+                        max_length=self.max_len.get(), 
+                        min_length=self.min_len.get()
+                    )
+                elif task == "Translation":
+                    lang = self.lang_var.get()
+                    self.models["Translation"] = TranslationModelAdapter(lang)
+                    res = self.models["Translation"].run(line)
+                else:
+                    res = f"Batch not supported for {task}"
+                results.append({"input": line, "output": res})
+
+            self.output_box.delete("1.0", "end")
+            for r in results:
+                self.output_box.insert(
+                    "end", f"INPUT: {r['input']}\nOUTPUT: {r['output']}\n\n"
+                )
+
+            return results
+        except Exception as e:
+            messagebox.showerror("Error", f"Batch processing failed: {e}")
+            return []
+
+
     # ------------------ Settings & About ------------------
     def open_settings(self):
         dlg = ctk.CTkToplevel(self)
