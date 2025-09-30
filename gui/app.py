@@ -315,6 +315,7 @@ class NLPApp(ctk.CTk):
         text.configure(state="disabled")
         ctk.CTkButton(win, text="Close", command=win.destroy).pack(pady=8)
 
+    # ------------------ Batch Processing ------------------
     def run_batch_file(self, task, filepath):
         try:
             results = []
@@ -346,7 +347,6 @@ class NLPApp(ctk.CTk):
         except Exception as e:
             messagebox.showerror("Error", f"Batch processing failed: {e}")
             return []
-
 
     # ------------------ Settings & About ------------------
     def open_settings(self):
