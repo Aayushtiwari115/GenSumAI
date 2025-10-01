@@ -169,35 +169,35 @@ def setup_layout(app):
     center_nav = ctk.CTkFrame(nav, fg_color="transparent")
     center_nav.pack(side="left", expand=True)
 
-    # Model selector
-    model_names = []
-    for m in app.models.values():
-        if hasattr(m, "get_model_name"):
-            try:
-                model_names.append(m.get_model_name())
-            except Exception:
-                model_names.append(str(m))
-        else:
-            model_names.append(str(m))
+    # # Model selector
+    # model_names = []
+    # for m in app.models.values():
+    #     if hasattr(m, "get_model_name"):
+    #         try:
+    #             model_names.append(m.get_model_name())
+    #         except Exception:
+    #             model_names.append(str(m))
+    #     else:
+    #         model_names.append(str(m))
 
-    app.model_selector = ctk.CTkOptionMenu(
-        center_nav, values=model_names, width=260, command=app.on_model_selected
-    )
-    try:
-        default_model = app.models.get("Text Generation").get_model_name()
-        app.model_selector.set(default_model)
-    except Exception:
-        if model_names:
-            app.model_selector.set(model_names[0])
-    app.model_selector.pack(side="left", padx=(6, 12))
-    ToolTip(app.model_selector, "Select the underlying model")
+    # app.model_selector = ctk.CTkOptionMenu(
+    #     center_nav, values=model_names, width=260, command=app.on_model_selected
+    # )
+    # try:
+    #     default_model = app.models.get("Text Generation").get_model_name()
+    #     app.model_selector.set(default_model)
+    # except Exception:
+    #     if model_names:
+    #         app.model_selector.set(model_names[0])
+    # app.model_selector.pack(side="left", padx=(6, 12))
+    # ToolTip(app.model_selector, "Select the underlying model")
 
-    # Segmented task switcher
-    app.task_segment = ctk.CTkSegmentedButton(
-        center_nav, values=list(app.models.keys()), command=app.select_task
-    )
-    app.task_segment.set("Text Generation")
-    app.task_segment.pack(side="left", padx=6)
+    # # Segmented task switcher
+    # app.task_segment = ctk.CTkSegmentedButton(
+    #     center_nav, values=list(app.models.keys()), command=app.select_task
+    # )
+    # app.task_segment.set("Text Generation")
+    # app.task_segment.pack(side="left", padx=6)
 
     # Right nav
     right_nav = ctk.CTkFrame(nav, fg_color="transparent")
