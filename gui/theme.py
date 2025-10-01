@@ -5,8 +5,8 @@ THEME = {
     "VERSION": "1.0.0",
 
     # Colors
-    "PRIMARY": "#2B7BE4",
-    "ACCENT": "#7AD3FF",
+    "PRIMARY": "#2B7BE4",      # main blue
+    "ACCENT": "#7AD3FF",       # lighter accent blue
     "SUCCESS": "#4CAF50",
     "WARN": "#FFB020",
     "ERROR": "#E14D4D",
@@ -37,7 +37,7 @@ THEME = {
     "DROPDOWN": "#2B7BE4",
 }
 
-# Default global settings
+# ---------------- Global defaults ----------------
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
@@ -45,6 +45,7 @@ ctk.set_default_color_theme("blue")
 def update_colors(app):
     """
     Update widget colors dynamically depending on light/dark mode.
+    Ensures consistency across sidebar, frames, text, and dropdowns.
     """
     is_dark = ctk.get_appearance_mode().lower() == "dark"
     bg_color = THEME["BG_DARK"] if is_dark else THEME["BG_LIGHT"]
@@ -57,16 +58,22 @@ def update_colors(app):
     except Exception:
         pass
 
-    # Update frame-like widgets
-    for attr in ("sidebar", "input_frame", "controls", "output_frame", "right_panel"):
+    # Frames and panels
+    for attr in (
+        "sidebar",
+        "input_frame",
+        "output_frame",
+        "right_panel",
+        "statusbar",
+    ):
         w = getattr(app, attr, None)
         if w is not None:
             try:
-                w.configure(fg_color=("gray90", card_color))
+                w.configure(fg_color=card_color)
             except Exception:
                 pass
 
-    # Update key labels
+    # Labels (titles, status, headers)
     for label_name in (
         "title_label",
         "input_label",
@@ -81,9 +88,38 @@ def update_colors(app):
             except Exception:
                 pass
 
-    # Ensure translation dropdown follows theme
+    # Dropdown (language selector)
     if hasattr(app, "lang_dropdown") and app.lang_dropdown is not None:
         try:
-            app.lang_dropdown.configure(fg_color=("gray85", card_color))
+            app.lang_dropdown.configure(
+                fg_color=THEME["PRIMARY"],
+                button_color=THEME["PRIMARY"],
+                button_hover_color=THEME["HOVER"],
+                text_color="white" if is_dark else "black",
+                dropdown_fg_color=card_color,
+                dropdown_text_color=text_color,
+                dropdown_hover_color=THEME["ACCENT"],
+            )
         except Exception:
             pass
+
+    # Buttons → ensure consistent size & theme
+    for btn_name in (
+        "run_button",
+        "batch_button",
+        "clear_btn",
+        "menu_btn",
+        "image_browse_btn",
+    ):
+        btn = getattr(app, btn_name, None)
+        if btn is not None:
+            try:
+                btn.configure(
+                    fg_color=THEME["PRIMARY"],
+                    hover_color=THEME["HOVER"],
+                    text_color="white",
+                    corner_radius=6,
+                    height=36,
+                )
+            except Exception:
+                pass
