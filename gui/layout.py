@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox, filedialog
+from tkinter import filedialog
 from .theme import THEME
 
 
@@ -90,6 +90,13 @@ def setup_layout(app):
     ).pack(anchor="w", pady=(0, 8))
 
     app.task_buttons = {}
+    app.current_task = "Text Generation"   # default task
+
+    def on_task_select(task_name):
+        app.current_task = task_name
+        app.select_task(task_name)
+        update_toolbar_visibility(task_name)
+
     for task in app.models.keys():
         if "Text" in task:
             icon = app.icons.get("gen")
@@ -114,10 +121,10 @@ def setup_layout(app):
             hover_color=THEME["HOVER"],
             text_color=(THEME["TEXT_LIGHT"], THEME["TEXT_DARK"]),
             font=THEME["FONT_MD"],
-            command=lambda t=task: app.select_task(t),
+            command=lambda t=task: on_task_select(t),
         )
         btn.pack(fill="x", pady=6)
-        btn.bind("<Return>", lambda e, t=task: app.select_task(t))
+        btn.bind("<Return>", lambda e, t=task: on_task_select(t))
         app.task_buttons[task] = btn
 
     # Sidebar bottom
@@ -165,41 +172,7 @@ def setup_layout(app):
         text_color=(THEME["TEXT_LIGHT"], THEME["TEXT_DARK"]),
     ).pack(anchor="w")
 
-    # Center nav
-    center_nav = ctk.CTkFrame(nav, fg_color="transparent")
-    center_nav.pack(side="left", expand=True)
-
-    # # Model selector
-    # model_names = []
-    # for m in app.models.values():
-    #     if hasattr(m, "get_model_name"):
-    #         try:
-    #             model_names.append(m.get_model_name())
-    #         except Exception:
-    #             model_names.append(str(m))
-    #     else:
-    #         model_names.append(str(m))
-
-    # app.model_selector = ctk.CTkOptionMenu(
-    #     center_nav, values=model_names, width=260, command=app.on_model_selected
-    # )
-    # try:
-    #     default_model = app.models.get("Text Generation").get_model_name()
-    #     app.model_selector.set(default_model)
-    # except Exception:
-    #     if model_names:
-    #         app.model_selector.set(model_names[0])
-    # app.model_selector.pack(side="left", padx=(6, 12))
-    # ToolTip(app.model_selector, "Select the underlying model")
-
-    # # Segmented task switcher
-    # app.task_segment = ctk.CTkSegmentedButton(
-    #     center_nav, values=list(app.models.keys()), command=app.select_task
-    # )
-    # app.task_segment.set("Text Generation")
-    # app.task_segment.pack(side="left", padx=6)
-
-    # Right nav
+    # Right nav (buttons only)
     right_nav = ctk.CTkFrame(nav, fg_color="transparent")
     right_nav.pack(side="right", padx=6)
 
@@ -207,6 +180,7 @@ def setup_layout(app):
         right_nav,
         text="Run",
         width=100,
+        height=36,
         command=app.run_model,
         image=app.icons.get("run"),
     )
@@ -216,12 +190,13 @@ def setup_layout(app):
     def _run_batch():
         path = filedialog.askopenfilename()
         if path:
-            app.run_batch_file(app.task_var.get(), path)
+            app.run_batch_file(app.current_task, path)
 
     app.batch_button = ctk.CTkButton(
         right_nav,
         text="Batch Run",
         width=100,
+        height=36,
         command=_run_batch,
         image=app.icons.get("run"),
         fg_color=THEME["PRIMARY"]
@@ -233,6 +208,7 @@ def setup_layout(app):
         right_nav,
         text="Clear",
         width=80,
+        height=36,
         command=app.clear_all,
         image=app.icons.get("clear"),
     )
@@ -241,7 +217,7 @@ def setup_layout(app):
         ToolTip(clear_btn, "Clear input & output (Ctrl+L)")
 
     menu_btn = ctk.CTkButton(
-        right_nav, text="Menu", width=80, command=app.open_menu_window
+        right_nav, text="Menu", width=80, height=36, command=app.open_menu_window
     )
     menu_btn.pack(side="left", padx=6)
     ToolTip(menu_btn, "Open Files & Menu")
@@ -340,6 +316,7 @@ def setup_layout(app):
         text="Browse Image",
         command=lambda: app.browse_image(),
         width=140,
+        height=36,
         fg_color=THEME["PRIMARY"],
         text_color="white"
     )
@@ -347,7 +324,7 @@ def setup_layout(app):
     # Visibility controller for Browse Image
     def update_toolbar_visibility(task_name=None):
         if not task_name:
-            task_name = app.task_segment.get()
+            task_name = app.current_task
         for widget in toolbar_row3.winfo_children():
             widget.pack_forget()
         if task_name == "Image Classification":
@@ -355,14 +332,8 @@ def setup_layout(app):
         else:
             app._toolbar_placeholder.pack(fill="x")
 
-    # Wrap original task selector
-    old_select_task = app.select_task
-    def wrapped_select_task(task_name):
-        old_select_task(task_name)
-        update_toolbar_visibility(task_name)
-    app.select_task = wrapped_select_task
-
-    update_toolbar_visibility(app.task_segment.get())
+    # Init
+    update_toolbar_visibility(app.current_task)
 
     # ---------------- Status / progress ----------------
     status_frame = ctk.CTkFrame(left_col, fg_color="transparent")
@@ -450,8 +421,7 @@ def setup_layout(app):
         "Tip: Use Ctrl+R to run, Ctrl+L to clear, Ctrl+C to copy output, Ctrl+T to toggle input."
     )
 
- 
-       # ---------------- Status bar ----------------
+    # ---------------- Status bar ----------------
     statusbar = ctk.CTkFrame(main, height=36, fg_color=("gray95", THEME["CARD_DARK"]))
     statusbar.pack(fill="x", pady=(12, 0))
     statusbar.pack_propagate(False)
