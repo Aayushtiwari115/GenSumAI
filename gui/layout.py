@@ -202,6 +202,7 @@ def setup_layout(app):
     # Right nav
     right_nav = ctk.CTkFrame(nav, fg_color="transparent")
     right_nav.pack(side="right", padx=6)
+
     app.run_button = ctk.CTkButton(
         right_nav,
         text="Run",
@@ -236,7 +237,8 @@ def setup_layout(app):
         image=app.icons.get("clear"),
     )
     clear_btn.pack(side="left", padx=6)
-    ToolTip(clear_btn, "Clear input & output (Ctrl+L)")
+    if app.icons.get("clear"):
+        ToolTip(clear_btn, "Clear input & output (Ctrl+L)")
 
     menu_btn = ctk.CTkButton(
         right_nav, text="Menu", width=80, command=app.open_menu_window
@@ -288,11 +290,11 @@ def setup_layout(app):
     app.input_box = ctk.CTkTextbox(app.input_frame, height=200, font=THEME["FONT_MD"])
     app.input_box.pack(fill="both", padx=P, pady=(0, P))
 
- # Toolbar container
+    # ---------------- Toolbar ----------------
     toolbar = ctk.CTkFrame(left_col, fg_color="transparent")
     toolbar.pack(fill="x", pady=(0, 12))
 
-# First row: Max/Min length controls
+    # First row: Max/Min length controls
     toolbar_row1 = ctk.CTkFrame(toolbar, fg_color="transparent")
     toolbar_row1.pack(fill="x")
 
@@ -304,58 +306,13 @@ def setup_layout(app):
     ctk.CTkLabel(toolbar_row1, text="Min length:", font=THEME["FONT_SM"]).pack(side="left", padx=(0, 6))
     ctk.CTkEntry(toolbar_row1, textvariable=app.min_len, width=80, height=32).pack(side="left", padx=(0, 12))
 
-# Second row: Dropdown + Buttons
+    # Second row: Language dropdown
     toolbar_row2 = ctk.CTkFrame(toolbar, fg_color="transparent")
     toolbar_row2.pack(fill="x", pady=(6, 0))
 
+    app.lang_var = ctk.StringVar(value=app.supported_languages[0])
     app.lang_dropdown = ctk.CTkOptionMenu(
-    toolbar_row2,
-    variable=app.lang_var,
-    values=app.supported_languages,
-    width=200,
-    fg_color=THEME["PRIMARY"],
-    button_color=THEME["PRIMARY"],
-    button_hover_color="#1f6aa5",
-    text_color="black",
-    dropdown_fg_color="#f5f5f5",
-    dropdown_text_color="black",
-    dropdown_hover_color="#d1d1d1"
-)
-    app.lang_dropdown.pack(side="left", padx=(12, 0))
-
-    app.image_browse_btn = ctk.CTkButton(
-    toolbar_row2,
-    text="Browse Image",
-    command=lambda: app.browse_image(),
-    width=140,
-    fg_color=THEME["PRIMARY"],
-    text_color="white"
-)
-    app.image_browse_btn.pack(side="left", padx=(12, 0))
-
-    app.run_btn = ctk.CTkButton(
-    toolbar_row2,
-    text="Run",
-    command=app.run_model,
-    width=100,
-    fg_color=THEME["PRIMARY"],
-    text_color="white"
-)
-    app.run_btn.pack(side="left", padx=(12, 0))
-
-    app.clear_btn = ctk.CTkButton(
-    toolbar_row2,
-    text="Clear",
-    command=app.clear_all,
-    width=100,
-    fg_color=THEME["PRIMARY"],
-    text_color="white"
-)
-    app.clear_btn.pack(side="left", padx=(12, 0))
-
-    # Translation dropdown
-    app.lang_dropdown = ctk.CTkOptionMenu(
-        toolbar,
+        toolbar_row2,
         variable=app.lang_var,
         values=app.supported_languages,
         width=200,
@@ -367,22 +324,47 @@ def setup_layout(app):
         dropdown_text_color="black",
         dropdown_hover_color="#d1d1d1"
     )
-    #app.lang_dropdown.pack(side="left", padx=(12, 0))
-    #app.lang_dropdown.pack_forget()
+    app.lang_dropdown.pack(side="left", padx=12, pady=4)
 
-    # Image browse button
+    # Third row: Task-specific controls
+    toolbar_row3 = ctk.CTkFrame(toolbar, fg_color="transparent", height=48)
+    toolbar_row3.pack(fill="x", pady=(6, 0))
+    toolbar_row3.pack_propagate(False)
+
+    # Placeholder keeps row height if button hidden
+    app._toolbar_placeholder = ctk.CTkLabel(toolbar_row3, text="", fg_color="transparent")
+    app._toolbar_placeholder.pack(fill="x")
+
     app.image_browse_btn = ctk.CTkButton(
-        toolbar,
+        toolbar_row3,
         text="Browse Image",
         command=lambda: app.browse_image(),
         width=140,
         fg_color=THEME["PRIMARY"],
         text_color="white"
     )
-    #app.image_browse_btn.pack(side="left", padx=(12, 0))
-    #app.image_browse_btn.pack_forget()
 
-    # Status / progress
+    # Visibility controller for Browse Image
+    def update_toolbar_visibility(task_name=None):
+        if not task_name:
+            task_name = app.task_segment.get()
+        for widget in toolbar_row3.winfo_children():
+            widget.pack_forget()
+        if task_name == "Image Classification":
+            app.image_browse_btn.pack(side="left", padx=6, pady=4)
+        else:
+            app._toolbar_placeholder.pack(fill="x")
+
+    # Wrap original task selector
+    old_select_task = app.select_task
+    def wrapped_select_task(task_name):
+        old_select_task(task_name)
+        update_toolbar_visibility(task_name)
+    app.select_task = wrapped_select_task
+
+    update_toolbar_visibility(app.task_segment.get())
+
+    # ---------------- Status / progress ----------------
     status_frame = ctk.CTkFrame(left_col, fg_color="transparent")
     status_frame.pack(fill="x", pady=(0, 12))
     app.progress = ctk.CTkProgressBar(status_frame, orientation="horizontal", width=300)
@@ -416,7 +398,8 @@ def setup_layout(app):
         command=app.copy_output,
     )
     copy_btn.pack(side="left", padx=6)
-    ToolTip(copy_btn, "Copy output")
+    if app.icons.get("copy"):
+        ToolTip(copy_btn, "Copy output")
 
     clear_output_btn = ctk.CTkButton(
         actions,
@@ -428,7 +411,8 @@ def setup_layout(app):
         command=lambda: app.output_box.delete("1.0", "end"),
     )
     clear_output_btn.pack(side="left")
-    ToolTip(clear_output_btn, "Clear output")
+    if app.icons.get("close"):
+        ToolTip(clear_output_btn, "Clear output")
 
     app.output_box = ctk.CTkTextbox(app.output_frame, font=THEME["FONT_MD"])
     app.output_box.pack(fill="both", expand=True, padx=P, pady=(0, P))
@@ -466,20 +450,29 @@ def setup_layout(app):
         "Tip: Use Ctrl+R to run, Ctrl+L to clear, Ctrl+C to copy output, Ctrl+T to toggle input."
     )
 
-    # Status bar
+ 
+       # ---------------- Status bar ----------------
     statusbar = ctk.CTkFrame(main, height=36, fg_color=("gray95", THEME["CARD_DARK"]))
     statusbar.pack(fill="x", pady=(12, 0))
     statusbar.pack_propagate(False)
+
     app.status_left = ctk.CTkLabel(
-        statusbar, text="Ready", font=THEME["FONT_SM"], anchor="w"
+        statusbar,
+        text="Ready",
+        font=THEME["FONT_SM"],
+        anchor="w"
     )
     app.status_left.pack(side="left", padx=P // 2)
+
     app.status_right = ctk.CTkLabel(
-        statusbar, text="Idle", font=THEME["FONT_SM"], anchor="e"
+        statusbar,
+        text="Idle",
+        font=THEME["FONT_SM"],
+        anchor="e"
     )
     app.status_right.pack(side="right", padx=P // 2)
 
-    # Keyboard shortcuts
+    # ---------------- Keyboard Shortcuts ----------------
     app.bind_all("<Control-r>", lambda e: app.run_model())
     app.bind_all("<Control-R>", lambda e: app.run_model())
     app.bind_all("<Control-l>", lambda e: app.clear_all())
@@ -491,5 +484,6 @@ def setup_layout(app):
 
     app.add_activity = add_activity
 
+    # ---------------- Apply Theme Colors ----------------
     from .theme import update_colors
     update_colors(app)
