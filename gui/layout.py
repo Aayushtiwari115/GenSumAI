@@ -212,12 +212,16 @@ def setup_layout(app):
     app.run_button.pack(side="left", padx=(6, 12))
     ToolTip(app.run_button, "Run the selected task (Ctrl+R)")
 
+    def _run_batch():
+        path = filedialog.askopenfilename()
+        if path:
+            app.run_batch_file(app.task_var.get(), path)
+
     app.batch_button = ctk.CTkButton(
         right_nav,
         text="Batch Run",
         width=100,
-        command=lambda: app.run_batch_file(app.task_var.get(), 
-                                           filedialog.askopenfilename()),
+        command=_run_batch,
         image=app.icons.get("run"),
         fg_color=THEME["PRIMARY"]
     )
@@ -337,13 +341,6 @@ def setup_layout(app):
     app.progress = ctk.CTkProgressBar(status_frame, orientation="horizontal", width=300)
     app.progress.set(0.0)
     app.progress.pack(side="left", padx=(0, 12))
-    app.status_label = ctk.CTkLabel(
-        status_frame,
-        text="Ready",
-        font=THEME["FONT_SM"],
-        text_color=("gray60", "gray70"),
-    )
-    app.status_label.pack(side="left")
 
     # Output card
     app.output_frame = ctk.CTkFrame(
@@ -445,3 +442,7 @@ def setup_layout(app):
     app.bind_all("<Control-q>", lambda e: app.quit())
     app.bind_all("<Control-Q>", lambda e: app.quit())
 
+    app.add_activity = add_activity
+
+    from .theme import update_colors
+    update_colors(app)
