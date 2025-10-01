@@ -288,23 +288,70 @@ def setup_layout(app):
     app.input_box = ctk.CTkTextbox(app.input_frame, height=200, font=THEME["FONT_MD"])
     app.input_box.pack(fill="both", padx=P, pady=(0, P))
 
-    # Toolbar
+ # Toolbar container
     toolbar = ctk.CTkFrame(left_col, fg_color="transparent")
     toolbar.pack(fill="x", pady=(0, 12))
+
+# First row: Max/Min length controls
+    toolbar_row1 = ctk.CTkFrame(toolbar, fg_color="transparent")
+    toolbar_row1.pack(fill="x")
+
     app.max_len = ctk.IntVar(value=150)
     app.min_len = ctk.IntVar(value=40)
-    ctk.CTkLabel(toolbar, text="Max length:", font=THEME["FONT_SM"]).pack(
-        side="left", padx=(0, 6)
-    )
-    ctk.CTkEntry(toolbar, textvariable=app.max_len, width=80, height=32).pack(
-        side="left", padx=(0, 12)
-    )
-    ctk.CTkLabel(toolbar, text="Min length:", font=THEME["FONT_SM"]).pack(
-        side="left", padx=(0, 6)
-    )
-    ctk.CTkEntry(toolbar, textvariable=app.min_len, width=80, height=32).pack(
-        side="left", padx=(0, 12)
-    )
+
+    ctk.CTkLabel(toolbar_row1, text="Max length:", font=THEME["FONT_SM"]).pack(side="left", padx=(0, 6))
+    ctk.CTkEntry(toolbar_row1, textvariable=app.max_len, width=80, height=32).pack(side="left", padx=(0, 12))
+    ctk.CTkLabel(toolbar_row1, text="Min length:", font=THEME["FONT_SM"]).pack(side="left", padx=(0, 6))
+    ctk.CTkEntry(toolbar_row1, textvariable=app.min_len, width=80, height=32).pack(side="left", padx=(0, 12))
+
+# Second row: Dropdown + Buttons
+    toolbar_row2 = ctk.CTkFrame(toolbar, fg_color="transparent")
+    toolbar_row2.pack(fill="x", pady=(6, 0))
+
+    app.lang_dropdown = ctk.CTkOptionMenu(
+    toolbar_row2,
+    variable=app.lang_var,
+    values=app.supported_languages,
+    width=200,
+    fg_color=THEME["PRIMARY"],
+    button_color=THEME["PRIMARY"],
+    button_hover_color="#1f6aa5",
+    text_color="black",
+    dropdown_fg_color="#f5f5f5",
+    dropdown_text_color="black",
+    dropdown_hover_color="#d1d1d1"
+)
+    app.lang_dropdown.pack(side="left", padx=(12, 0))
+
+    app.image_browse_btn = ctk.CTkButton(
+    toolbar_row2,
+    text="Browse Image",
+    command=lambda: app.browse_image(),
+    width=140,
+    fg_color=THEME["PRIMARY"],
+    text_color="white"
+)
+    app.image_browse_btn.pack(side="left", padx=(12, 0))
+
+    app.run_btn = ctk.CTkButton(
+    toolbar_row2,
+    text="Run",
+    command=app.run_model,
+    width=100,
+    fg_color=THEME["PRIMARY"],
+    text_color="white"
+)
+    app.run_btn.pack(side="left", padx=(12, 0))
+
+    app.clear_btn = ctk.CTkButton(
+    toolbar_row2,
+    text="Clear",
+    command=app.clear_all,
+    width=100,
+    fg_color=THEME["PRIMARY"],
+    text_color="white"
+)
+    app.clear_btn.pack(side="left", padx=(12, 0))
 
     # Translation dropdown
     app.lang_dropdown = ctk.CTkOptionMenu(
@@ -320,8 +367,8 @@ def setup_layout(app):
         dropdown_text_color="black",
         dropdown_hover_color="#d1d1d1"
     )
-    app.lang_dropdown.pack(side="left", padx=(12, 0))
-    app.lang_dropdown.pack_forget()
+    #app.lang_dropdown.pack(side="left", padx=(12, 0))
+    #app.lang_dropdown.pack_forget()
 
     # Image browse button
     app.image_browse_btn = ctk.CTkButton(
@@ -332,8 +379,8 @@ def setup_layout(app):
         fg_color=THEME["PRIMARY"],
         text_color="white"
     )
-    app.image_browse_btn.pack(side="left", padx=(12, 0))
-    app.image_browse_btn.pack_forget()
+    #app.image_browse_btn.pack(side="left", padx=(12, 0))
+    #app.image_browse_btn.pack_forget()
 
     # Status / progress
     status_frame = ctk.CTkFrame(left_col, fg_color="transparent")
