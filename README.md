@@ -1,9 +1,11 @@
 # HIT137 Assignment 3 — Tkinter AI GUI (Local Models)
 
-Runs locally on CPU using Hugging Face `transformers` + `torch`.
+Runs locally on CPU using Hugging Face `transformers` + `torch`.  
 Models:
 
-- Text Classification: `distilbert-base-uncased-finetuned-sst-2-english`
+- Text Summarization: `facebook/bart-large-cnn`
+- Text Generation: `openai-community/gpt2`
+- Translation (EN → target): `Helsinki-NLP/opus-mt-*` (French, German, Spanish, Italian, Russian, Chinese, Japanese, Arabic, Nepali, Hindi)
 - Image Classification: `google/vit-base-patch16-224`
 
 ## Setup
@@ -11,6 +13,7 @@ Models:
 ```bash
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -r requirements.txt
+
 
 or
 # Install these packages
