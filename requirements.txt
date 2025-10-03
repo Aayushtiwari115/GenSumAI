@@ -22,16 +22,16 @@ tqdm>=4.66.0
 # Ensure compatibility with your Python version (3.13)
 packaging>=23.2
 
-pip install customtkinter
-pip install Pillow
-pip install transformers
-pip install torch
-pip install sentencepiece
-pip install sacremoses
-pip install tokenizers
-pip install datasets
-pip install tqdm
-pip install packaging
+# pip install customtkinter
+# pip install Pillow
+# pip install transformers
+# pip install torch
+# pip install sentencepiece
+# pip install sacremoses
+# pip install tokenizers
+# pip install datasets
+# pip install tqdm
+# pip install packaging
 
 
 customtkinter

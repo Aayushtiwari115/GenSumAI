@@ -2,21 +2,39 @@
 
 Runs locally on CPU using Hugging Face `transformers` + `torch`.
 Models:
+
 - Text Classification: `distilbert-base-uncased-finetuned-sst-2-english`
 - Image Classification: `google/vit-base-patch16-224`
 
 ## Setup
+
 ```bash
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -r requirements.txt
+
+or
+# Install these packages
+pip install customtkinter
+pip install Pillow
+pip install transformers
+pip install torch
+pip install sentencepiece
+pip install sacremoses
+pip install tokenizers
+pip install datasets
+pip install tqdm
+pip install packaging
+
 ```
 
 ## Run
+
 ```bash
-python3 app.py
+python3 main.py
 ```
 
 ## OOP Concepts Used
+
 - Encapsulation: `BaseModelAdapter` hides private pipeline (`__pipeline`)
 - Inheritance: adapters inherit from `BaseModelAdapter`
 - Multiple Inheritance: adapters mix in `SaveOutputMixin`; GUI mixes `ThemingMixin`
