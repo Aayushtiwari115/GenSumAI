@@ -22,7 +22,7 @@ tqdm>=4.66.0
 # Ensure compatibility with your Python version (3.13)
 packaging>=23.2
 
-#pip install customtkinter
+pip install customtkinter
 pip install Pillow
 pip install transformers
 pip install torch
