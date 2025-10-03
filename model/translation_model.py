@@ -15,11 +15,11 @@ class TranslationModelAdapter:
         "Spanish": "Helsinki-NLP/opus-mt-en-es",
         "Italian": "Helsinki-NLP/opus-mt-en-it",
         "Russian": "Helsinki-NLP/opus-mt-en-ru",
-        "Chinese": "Helsinki-NLP/opus-mt-en-zh",   # fallback: zh_cn
-        "Japanese": "Helsinki-NLP/opus-mt-en-jap",  # safer than jap
+        "Chinese": "Helsinki-NLP/opus-mt-en-zh",   
+        "Japanese": "Helsinki-NLP/opus-mt-en-jap",  
         "Arabic": "Helsinki-NLP/opus-mt-en-ar",
         "Nepali": "Helsinki-NLP/opus-mt-en-ne",    # may fail
-        "Hindi": "Helsinki-NLP/opus-mt-en-hi",     # sometimes unstable
+        "Hindi": "Helsinki-NLP/opus-mt-en-hi",    
 }
 
 
